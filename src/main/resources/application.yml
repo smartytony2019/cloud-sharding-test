@@ -50,7 +50,6 @@ spring:
           max-lifetime: 1800000
           connection-timeout: 30000
           connection-test-query: SELECT 1
-
       ds2:
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: com.mysql.jdbc.Driver
@@ -70,7 +69,6 @@ spring:
 
     sharding:
       binding-tables: tb_order
-
       default-database-strategy:
         inline:
           algorithm-expression: ds$->{datanode % 3}
