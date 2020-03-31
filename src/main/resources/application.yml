@@ -1,0 +1,112 @@
+server:
+  port: 1122
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: cloud-sharding-test
+
+  #nacos配置
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 103.84.110.202:8848
+
+  #sharding 分库分表
+  shardingsphere:
+    props:
+      sql:
+        show: true
+    datasource:
+      names: ds0,ds1,ds2
+      ds0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        jdbc-url: jdbc:mysql://103.84.110.202:3306/myshop_0?useUnicode=true&characterEncoding=utf-8&serverTimezone=Hongkong&useSSL=false
+        username: root
+        password: '^qaz123@hm!@#$'
+        hikari:
+          minimum-idle: 5
+          idle-timeout: 600000
+          maximum-pool-size: 10
+          auto-commit: true
+          pool-name: MyHikariCP
+          max-lifetime: 1800000
+          connection-timeout: 30000
+          connection-test-query: SELECT 1
+      ds1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        jdbc-url: jdbc:mysql://103.84.110.202:3306/myshop_1?useUnicode=true&characterEncoding=utf-8&serverTimezone=Hongkong&useSSL=false
+        username: root
+        password: '^qaz123@hm!@#$'
+        hikari:
+          minimum-idle: 5
+          idle-timeout: 600000
+          maximum-pool-size: 10
+          auto-commit: true
+          pool-name: MyHikariCP
+          max-lifetime: 1800000
+          connection-timeout: 30000
+          connection-test-query: SELECT 1
+
+      ds2:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        jdbc-url: jdbc:mysql://103.84.110.202:3306/myshop_2?useUnicode=true&characterEncoding=utf-8&serverTimezone=Hongkong&useSSL=false
+        username: root
+        password: '^qaz123@hm!@#$'
+        hikari:
+          minimum-idle: 5
+          idle-timeout: 600000
+          maximum-pool-size: 10
+          auto-commit: true
+          pool-name: MyHikariCP
+          max-lifetime: 1800000
+          connection-timeout: 30000
+          connection-test-query: SELECT 1
+
+
+    sharding:
+      binding-tables: tb_order
+
+      default-database-strategy:
+        inline:
+          algorithm-expression: ds$->{datanode % 3}
+          sharding-column: datanode
+      tables:
+        tb_order:
+          actual-data-nodes: ds$->{0..2}.tb_order_$->{0..2}
+          table-strategy:
+            inline:
+              algorithm-expression: tb_order_$->{user_id % 3}
+              sharding-column: user_id
+#        tb_order_item:
+#          actual-data-nodes: ds$->{0..1}.tb_order_item_$->{0..1}
+#          table-strategy:
+#            inline:
+#              algorithm-expression: tb_order_item_$->{datanode % 2}
+#              sharding-column: datanode
+
+
+mybatis:
+  configuration:
+    # 下划线转驼峰
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mappers/common/*.xml,classpath:mappers/sport/*.xml,classpath:mappers/lottery/*.xml
+  type-aliases-package: com.xinbo.cloud.common.domain
+mapper:
+  mappers:
+    - tk.mybatis.mapper.MyMapper
+  not-empty: true
+  style: camelhump
+  wrap-keyword: "`{0}`"
+  safe-delete: true
+  safe-update: true
+  identity: MYSQL
+pagehelper:
+  auto-dialect: true
+  helper-dialect: mysql
+  reasonable: true
+  params: count=countSql
